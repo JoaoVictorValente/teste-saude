@@ -2,24 +2,24 @@ pipeline {
     agent any
 
     stages {
-        stage('Pull Apache Image') {
+        stage('Pull Nginx Image') {
             steps {
                 script {
-                    // Puxa a imagem do Apache
-                    sh 'docker pull httpd:latest'
+                    // Puxa a imagem do Nginx
+                    sh 'docker pull nginx:latest'
                 }
             }
         }
 
-        stage('Run Apache Container') {
+        stage('Run Nginx Container') {
             steps {
                 script {
                     // Para garantir que o container não esteja rodando, removemos qualquer instância anterior
-                    sh 'docker stop apache-server || true'
-                    sh 'docker rm apache-server || true'
+                    sh 'docker stop nginx-server || true'
+                    sh 'docker rm nginx-server || true'
                     
-                    // Inicia o novo container do Apache em primeiro plano
-                    sh 'docker run -d --name apache-server -p 3212:80 httpd:latest'
+                    // Inicia o novo container do Nginx em primeiro plano
+                    sh 'docker run -d --name nginx-server -p 3212:80 nginx:latest'
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
     post {
         always {
             // Exibe os logs do container após a execução
-            sh 'docker logs apache-server || true'
+            sh 'docker logs nginx-server || true'
         }
     }
 }
