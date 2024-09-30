@@ -2,22 +2,33 @@ pipeline {
     agent any
 
     stages {
-        stage('Docker Run') {
+        stage('Pull Apache Image') {
             steps {
-                // Para evitar conflitos, pare e remova o container se já estiver em execução
-                sh 'docker stop apache-server || true'
-                sh 'docker rm apache-server || true'
-
-                // Criar e rodar o container Apache com o arquivo de configuração
-                sh 'docker run -d -p 3212:80 --name apache-server -v /caminho/para/httpd.conf:/etc/httpd/conf/httpd.conf httpd'
+                script {
+                    // Puxa a imagem do Apache
+                    sh 'docker pull httpd:latest'
+                }
             }
         }
 
-        stage('Verify') {
+        stage('Run Apache Container') {
             steps {
-                // Verifica se o container está rodando
-                sh 'docker ps'
+                script {
+                    // Para garantir que o container não esteja rodando, removemos qualquer instância anterior
+                    sh 'docker stop apache-server || true'
+                    sh 'docker rm apache-server || true'
+                    
+                    // Inicia o novo container do Apache
+                    sh 'docker run -d --name apache-server -p 3212:80 httpd'
+                }
             }
+        }
+    }
+
+    post {
+        always {
+            // Exibe os logs do container após a execução
+            sh 'docker logs apache-server || true'
         }
     }
 }
