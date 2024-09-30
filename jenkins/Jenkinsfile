@@ -1,38 +1,26 @@
 pipeline {
-    agent {
-        docker { 
-            image 'docker:latest'  // Usa a imagem Docker dentro do agente
-            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Permite o uso do Docker do host
-        }
-    }
+    agent any
 
     stages {
-        stage('Pull Apache Image') {
+        stage('Docker Build') {
             steps {
-                sh 'docker pull httpd:latest'  // Baixa a imagem mais recente do Apache
+                // Criar e rodar o container Apache
+                sh 'docker run -d -p 3212:80 --name apache-server httpd'
             }
         }
 
-        stage('Run Apache Container') {
+        stage('Verify') {
             steps {
-                sh '''
-                    docker run -d --name apache-server -p 8080:80 httpd:latest
-                '''  // Sobe o container do Apache mapeando a porta 8080 para a porta 80 do container
+                // Verifica se o container está rodando
+                sh 'docker ps'
             }
         }
 
-        stage('Check Container') {
+        stage('Clean Up') {
             steps {
-                sh 'docker ps'  // Verifica se o container está rodando
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                // Limpa o container após a execução para evitar deixar resíduos
-                sh 'docker rm -f apache-server || true'
+                // Para e remove o container após o teste
+                sh 'docker stop apache-server || true'
+                sh 'docker rm apache-server || true'
             }
         }
     }
