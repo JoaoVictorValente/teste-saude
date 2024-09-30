@@ -1,52 +1,38 @@
 pipeline {
-    agent any
-
-    environment {
-        POM_VERSION = ""
+    agent {
+        docker { 
+            image 'docker:latest'  // Usa a imagem Docker dentro do agente
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Permite o uso do Docker do host
+        }
     }
 
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'maven:3.6.3'  // Definindo corretamente a imagem Docker
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'  // Permite que o Docker do host seja acessado dentro do container
-                }
-            }
+        stage('Pull Apache Image') {
             steps {
-                sh "mvn package -Dmaven.test.skip=true"
-                script {
-                    pom = readMavenPom file: 'pom.xml'
-                    POM_VERSION = pom.version
-                }
-                stash 'source'
+                sh 'docker pull httpd:latest'  // Baixa a imagem mais recente do Apache
             }
         }
 
-        stage('Docker build') {
+        stage('Run Apache Container') {
             steps {
-                unstash 'source'
-                sh "docker build . -t netodevel/netodevel-api:${POM_VERSION}"
+                sh '''
+                    docker run -d --name apache-server -p 8080:80 httpd:latest
+                '''  // Sobe o container do Apache mapeando a porta 8080 para a porta 80 do container
             }
         }
 
-        stage('Docker push to registry') {
+        stage('Check Container') {
             steps {
-                script {
-                    withCredentials([string(credentialsId: 'docker_hub_pat', variable: 'dockerHubPat')]) {
-                        sh "docker login -u netodevel -p ${dockerHubPat}"
-                        sh "docker push netodevel/netodevel-api:${POM_VERSION}"
-                    }
-                }
+                sh 'docker ps'  // Verifica se o container está rodando
             }
         }
+    }
 
-        stage('Apply Kubernetes files') {
-            steps {
-                withKubeConfig([credentialsId: 'kind-cluster-config', serverUrl: 'https://127.0.0.1:35433']) {
-                    sh 'kubectl apply -f k8s'
-                    sh 'kubectl rollout restart deployment netodevel-api'
-                }
+    post {
+        always {
+            script {
+                // Limpa o container após a execução para evitar deixar resíduos
+                sh 'docker rm -f apache-server || true'
             }
         }
     }
