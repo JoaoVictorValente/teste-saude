@@ -18,8 +18,8 @@ pipeline {
                     sh 'docker stop apache-server || true'
                     sh 'docker rm apache-server || true'
                     
-                    // Inicia o novo container do Apache
-                    sh 'docker run -d --name apache-server -p 3212:80 httpd'
+                    // Inicia o novo container do Apache em primeiro plano
+                    sh 'docker run -d --name apache-server -p 3212:80 httpd:latest'
                 }
             }
         }
