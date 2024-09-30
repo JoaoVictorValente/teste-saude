@@ -2,10 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Docker Build') {
+        stage('Docker Run') {
             steps {
-                // Criar e rodar o container Apache
-                sh 'docker run -d -p 3212:80 --name apache-server httpd'
+                // Para evitar conflitos, pare e remova o container se já estiver em execução
+                sh 'docker stop apache-server || true'
+                sh 'docker rm apache-server || true'
+
+                // Criar e rodar o container Apache com o arquivo de configuração
+                sh 'docker run -d -p 3212:80 --name apache-server -v /caminho/para/httpd.conf:/etc/httpd/conf/httpd.conf httpd'
             }
         }
 
@@ -13,14 +17,6 @@ pipeline {
             steps {
                 // Verifica se o container está rodando
                 sh 'docker ps'
-            }
-        }
-
-        stage('Clean Up') {
-            steps {
-                // Para e remove o container após o teste
-                sh 'docker stop apache-server || true'
-                sh 'docker rm apache-server || true'
             }
         }
     }
