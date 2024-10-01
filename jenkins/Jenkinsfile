@@ -5,10 +5,10 @@ pipeline {
         stage('Run ses-app using Docker Compose') {
             steps {
                 script {
-                    // Navega até o diretório ~/teste-saude onde o docker-compose.yml está localizado
-                    sh 'cd ~/teste-saude'
+                    // Navega até o diretório atualizado
+                    sh 'cd /opt/teste-saude'
 
-                    // Executa o Docker Compose para subir o container em segundo plano
+                    // Executa o Docker Compose para subir o container
                     sh 'docker-compose up -d'
                 }
             }
@@ -17,7 +17,7 @@ pipeline {
 
     post {
         always {
-            // Exibe os containers em execução para verificar se o ses-app subiu corretamente
+            // Exibe os containers em execução
             sh 'docker ps'
         }
     }
