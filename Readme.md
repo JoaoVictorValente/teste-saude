@@ -9,6 +9,6 @@ O primeiro nó VMweb01 foi onde subi um compose do jenkins para realizar o teste
 
 <img src="images/jenkins1.png" width="300"/>
 
-3- Aplicação funcionando com a pipe 
+3- Aplicação funcionando com a pipeline
 
-<img src="images/jenki.png" width="300"/>
+<img src="images/aplicação.png" width="300"/>
