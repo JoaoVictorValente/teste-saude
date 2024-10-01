@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Navega até o diretório atualizado
-                    sh 'cd /opt/teste-saude'
+                    sh 'cd /home/jenkins/teste-saude'
 
                     // Executa o Docker Compose para subir o container
                     sh 'docker-compose up -d'
