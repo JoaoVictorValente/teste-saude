@@ -2,24 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Pull Nginx Image') {
+        stage('Run ses-app using Docker Compose') {
             steps {
                 script {
-                    // Puxa a imagem do Nginx
-                    sh 'docker pull nginx:latest'
-                }
-            }
-        }
+                    // Navega até o diretório ~/teste-saude onde o docker-compose.yml está localizado
+                    sh 'cd ~/teste-saude'
 
-        stage('Run Nginx Container') {
-            steps {
-                script {
-                    // Para garantir que o container não esteja rodando, removemos qualquer instância anterior
-                    sh 'docker stop nginx-server || true'
-                    sh 'docker rm nginx-server || true'
-                    
-                    // Inicia o novo container do Nginx em primeiro plano
-                    sh 'docker run -d --name nginx-server -p 8181:80 nginx:latest'
+                    // Executa o Docker Compose para subir o container em segundo plano
+                    sh 'docker-compose up -d'
                 }
             }
         }
@@ -27,8 +17,8 @@ pipeline {
 
     post {
         always {
-            // Exibe os logs do container após a execução
-            sh 'docker logs nginx-server || true'
+            // Exibe os containers em execução para verificar se o ses-app subiu corretamente
+            sh 'docker ps'
         }
     }
 }
