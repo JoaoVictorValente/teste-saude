@@ -1,4 +1,4 @@
-1- Criação do Cluster no Proxmox
+1- Criação do Cluster no Proxmox--
 
 
 <img src="images/proxmox1.png"  width="300"/>
